@@ -171,6 +171,11 @@ function main() {
     echo "Not suport this mode!"
   fi
 
+  if [ "${SLEEP_TIME}"z != ""z ]; then
+    sleep $SLEEP_TIME
+    echo "will sleep ${SLEEP_TIME} second..."
+  fi
+
 }
 
 main "$@"
