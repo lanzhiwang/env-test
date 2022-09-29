@@ -18,6 +18,7 @@ RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-* \
     && yum install -y epel-release && yum provides '*/applydeltarpm' && yum install -y deltarpm \
     && yum install -y iperf3 && yum install -y fio && yum install -y lshw && yum install -y jq \
     && yum install -y sysbench && yum install -y tree && yum install -y pciutils && yum install -y libtool \
+    && yum install -y vim && yum install -y telnet && yum install -y net-tools \
     && yum install -y pkgconfig && yum install -y libaio-devel && yum clean all
 
 ENTRYPOINT ["/workspace/endpoint.sh"]
