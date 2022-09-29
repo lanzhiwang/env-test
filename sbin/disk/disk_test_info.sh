@@ -34,6 +34,7 @@ function disk_throughput_info() {
   disk_throughput_rand_write_key="disk_throughput_rand_write"
 
   #prepare
+  mkdir -p ${1}/sbin/disk/data
   cd ${1}/sbin/disk/data
   sysbench fileio --threads=16 --file-total-size=$size --file-test-mode=rndrw prepare &>/dev/null
 
