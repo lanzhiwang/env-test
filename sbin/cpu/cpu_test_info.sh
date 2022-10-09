@@ -37,14 +37,10 @@ function cpu_thread_test_info() {
 function cpu_mips_test_info() {
   cpu_mips_key="cpu_mips"
 
-  chmod +x ${1}/tools/dhrystone2/dhrystone2*
+  chmod +x ${1}/tools/dhrystone2*
   cpu_mips_value=""
-  if [ "${2}" = "x86_64" ]; then
-    cpu_mips_value=$(${1}/tools/dhrystone2/dhrystone2_${2} n | grep "VAX  MIPS rating" | awk -F'=' '{print $2}')
-    cpu_mips_value=$(trim_space "$cpu_mips_value")
-  elif [ "${2}" = "aarch64" ]; then
-    echo "not support this arch!"
-  fi
+  cpu_mips_value=$(${1}/tools/dhrystone2 n | grep "VAX  MIPS rating" | awk -F'=' '{print $2}')
+  cpu_mips_value=$(trim_space "$cpu_mips_value")
 
 
   cpu_mips=$(create_json "$cpu_mips_key" "$cpu_mips_value")
