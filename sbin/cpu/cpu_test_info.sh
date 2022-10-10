@@ -37,10 +37,10 @@ function cpu_thread_test_info() {
 function cpu_mips_test_info() {
   cpu_mips_key="cpu_mips"
 
-  chmod +x ${1}/tools/dhrystone2*
+  chmod +x ${1}/tools/dhrystone
   cpu_mips_value=""
-  cpu_mips_value=$(${1}/tools/dhrystone2 n | grep "VAX  MIPS rating" | awk -F'=' '{print $2}')
-  cpu_mips_value=$(trim_space "$cpu_mips_value")
+  cpu_mips_value=$(${1}/tools/dhrystone 2>/dev/null| grep "Dhrystones per Second" | awk -F':' '{print $2}')
+  cpu_mips_value=$(($cpu_mips_value/1757))
 
 
   cpu_mips=$(create_json "$cpu_mips_key" "$cpu_mips_value")

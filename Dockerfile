@@ -15,7 +15,7 @@ RUN gcc -c dry.c -o dry.o && gcc -DPASS2  dry.c dry.o  -o dry
 FROM centos:centos7.9.2009
 
 COPY --from=builder /usr/local/bin/sysbench /usr/local/bin/sysbench
-COPY --from=builder /src/dhrystone/v2.2/dry /workspace/tools/dhrystone2
+COPY --from=builder /src/dhrystone/v2.2/dry /workspace/tools/dhrystone
 
 WORKDIR /workspace
 
