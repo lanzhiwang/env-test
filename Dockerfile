@@ -7,15 +7,15 @@ WORKDIR /src/sysbench-1.0.20
 RUN sh autogen.sh && ./configure --without-mysql && make -j8 && make install
 
 WORKDIR /src
-RUN git clone https://github.com/Keith-S-Thompson/dhrystone
-WORKDIR /src/dhrystone/v2.2
+COPY pkg/dhrystone ./dhrystone
+WORKDIR /src/dhrystone
 RUN gcc -c dry.c -o dry.o && gcc -DPASS2  dry.c dry.o  -o dry
 
 # Build the manager binary
 FROM centos:centos7.9.2009
 
 COPY --from=builder /usr/local/bin/sysbench /usr/local/bin/sysbench
-COPY --from=builder /src/dhrystone/v2.2/dry /workspace/tools/dhrystone
+COPY --from=builder /src/dhrystone/dry /workspace/tools/dhrystone
 
 WORKDIR /workspace
 
