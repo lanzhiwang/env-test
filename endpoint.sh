@@ -150,7 +150,6 @@ function main() {
       echo "normal mode must set IPERF3_SERVER_ADDR and IPERF3_SERVER_PORT env first!"
       return 1
     fi
-
     # device info
     cpu_device_info
     mem_device_info
@@ -159,12 +158,16 @@ function main() {
 
     # system info
     system_info
-
+    timer=${RUN_TIME:-600}
+    while [ $timer -gt 0 ]; do
     # device test
     cpu_test
     mem_test
     disk_test
     network_test
+      sleep 5 # 暫停5秒
+      timer=$((timer-5)) # 更新計時器
+    done
 
 #    while true;do echo "Welcome to env test of normal";sleep 60;done
   else
