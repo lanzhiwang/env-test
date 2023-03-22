@@ -1,0 +1,127 @@
+apiVersion: builds.katanomi.dev/v1alpha1
+kind: Build
+spec:
+  workspaces:
+    - description: >
+        This workspace is shared among all the pipeline tasks to read/write
+        common resources
+      name: source
+  tasks:
+    - name: generate-version
+      timeout: 30m
+      retries: 0
+      taskRef:
+        kind: ClusterTask
+        name: alauda-generate-version
+      workspaces:
+        - name: source
+          workspace: source
+      params:
+        - name: repo-url
+          value: $(params.git-url)
+        - name: repo-ref
+          value: $(params.git-revision)
+    - name: build-image-amd64
+      runAfter:
+        - unit-test
+        - code-scan
+      timeout: 30m
+      retries: 0
+      taskRef:
+        kind: ClusterTask
+        name: build-image-buildkit
+      workspaces:
+        - name: source
+          workspace: source
+      params:
+        - name: container-images
+          value:
+            - build-harbor.alauda.cn/middleware/env-test
+        - name: dockerfile
+          value: ./build/docker/Dockerfile
+        - name: labels
+          value:
+            - branch=$(tasks.generate-version.results.branch)
+            - commit=$(tasks.generate-version.results.commit-id)
+    - name: build-image-arm64
+      runAfter:
+        - code-scan
+        - unit-test
+      timeout: 30m
+      retries: 0
+      taskRef:
+        kind: ClusterTask
+        name: build-image-buildkit
+      workspaces:
+        - name: source
+          workspace: source
+      params:
+        - name: container-images
+          value:
+            - build-harbor.alauda.cn/middleware/env-test
+        - name: dockerfile
+          value: ./build/docker/Dockerfile
+        - name: labels
+          value:
+            - branch=$(tasks.generate-version.results.branch)
+            - commit=$(tasks.generate-version.results.commit-id)
+    - name: merge-image
+      runAfter:
+        - build-image-arm64
+        - build-image-amd64
+      timeout: 30m
+      retries: 0
+      taskRef:
+        kind: ClusterTask
+        name: merge-image-buildkit
+      workspaces:
+        - name: source
+          workspace: source
+      params:
+        - name: container-images
+          value:
+            - build-harbor.alauda.cn/middleware/env-test:$(tasks.generate-version.results.version)
+        - name: source-image-digests
+          value:
+            - $(tasks.build-image-arm64.results.ociContainerImageBuild-url)
+            - $(tasks.build-image-amd64.results.ociContainerImageBuild-url)
+    - name: scan-image
+      runAfter:
+        - merge-image
+      timeout: 30m
+      retries: 0
+      taskRef:
+        kind: ClusterTask
+        name: trivy-image-scan
+      workspaces:
+        - name: source
+          workspace: source
+      params:
+        - name: targets
+          value:
+            - $(tasks.merge-image.results.ociContainerImageBuild-url)
+        - name: quality-gate
+          value: "false"
+  git:
+    options:
+      depth: 1
+      timeout: 10m
+      retries: 0
+      resources:
+        limits:
+          cpu: 200m
+          memory: 200Mi
+        requests:
+          cpu: 200m
+          memory: 200Mi
+  runTemplate:
+    spec:
+      taskRunSpecs:
+        - pipelineTaskName: build-image-arm64
+          taskPodTemplate:
+            nodeSelector:
+              kubernetes.io/arch: arm64
+            Tolerations:
+              - key: build-arm
+                operator: Exists
+                effect: NoSchedule
