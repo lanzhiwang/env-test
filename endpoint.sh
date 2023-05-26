@@ -95,10 +95,16 @@ function disk_test() {
 
   disk_iops_4krandrw_read=$(cat ./sbin/disk/data.json | jq -r .disk_iops_4krandrw_read)
   disk_iops_4krandrw_write=$(cat ./sbin/disk/data.json | jq -r .disk_iops_4krandrw_write)
+  disk_4krandr_read_95clat=$(cat ./sbin/disk/data.json | jq -r .disk_4krandr_read_95clat)
+  disk_4krandr_write_95clat=$(cat ./sbin/disk/data.json | jq -r .disk_4krandr_write_95clat)
+  disk_4krandr_read_maxlat=$(cat ./sbin/disk/data.json | jq -r .disk_4krandr_read_maxlat)
+  disk_4krandr_write_maxlat=$(cat ./sbin/disk/data.json | jq -r .disk_4krandr_write_maxlat)
   disk_throughput_rand_read=$(cat ./sbin/disk/data.json | jq -r .disk_throughput_rand_read)
   disk_throughput_rand_write=$(cat ./sbin/disk/data.json | jq -r .disk_throughput_rand_write)
   echo "---------------------------------Disk Test Info---------------------------------"
   echo -e "disk_iops_4krandrw_read: $disk_iops_4krandrw_read (4k数据块随机读iops)\t disk_iops_4krandrw_write: $disk_iops_4krandrw_write (4k数据块随机写iops)"
+  echo -e "disk_4krandr_read_95clat: $disk_4krandr_read_95clat (4k数据块随机读95%延迟)\t disk_4krandr_write_95clat: $disk_4krandr_write_95clat (4k数据块随机写95%延迟)"
+  echo -e "disk_4krandr_read_maxlat: $disk_4krandr_read_maxlat (4k数据块随机读最大延迟)\t disk_4krandr_write_maxlat: $disk_4krandr_write_maxlat (4k数据块随机写最大延迟)"
   echo -e "disk_throughput_rand_read: $disk_throughput_rand_read (随机读吞吐量)\t disk_throughput_rand_write: $disk_throughput_rand_write (随机写吞吐量)"
   echo -e "\n"
   rm -rf ./sbin/disk/data.json

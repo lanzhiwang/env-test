@@ -7,20 +7,6 @@ spec:
         common resources
       name: source
   tasks:
-    - name: generate-version
-      timeout: 30m
-      retries: 0
-      taskRef:
-        kind: ClusterTask
-        name: alauda-generate-version
-      workspaces:
-        - name: source
-          workspace: source
-      params:
-        - name: repo-url
-          value: $(params.git-url)
-        - name: repo-ref
-          value: $(params.git-revision)
     - name: build-image-amd64
       runAfter:
         - unit-test
@@ -41,8 +27,8 @@ spec:
           value: ./build/docker/Dockerfile
         - name: labels
           value:
-            - branch=$(tasks.generate-version.results.branch)
-            - commit=$(tasks.generate-version.results.commit-id)
+            - branch=$(build.git.branch.name)
+            - commit=$(build.git.lastCommit.id)
     - name: build-image-arm64
       runAfter:
         - code-scan
@@ -63,8 +49,8 @@ spec:
           value: ./build/docker/Dockerfile
         - name: labels
           value:
-            - branch=$(tasks.generate-version.results.branch)
-            - commit=$(tasks.generate-version.results.commit-id)
+            - branch=$(build.git.branch.name)
+            - commit=$(build.git.lastCommit.id)
     - name: merge-image
       runAfter:
         - build-image-arm64
@@ -80,7 +66,7 @@ spec:
       params:
         - name: container-images
           value:
-            - build-harbor.alauda.cn/middleware/env-test:$(tasks.generate-version.results.version)
+            - build-harbor.alauda.cn/middleware/env-test:$(build.git.version.docker)
         - name: source-image-digests
           value:
             - $(tasks.build-image-arm64.results.ociContainerImageBuild-url)
