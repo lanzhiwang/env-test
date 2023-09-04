@@ -7,10 +7,11 @@ function cpu_device_info() {
   cpu_model=$(cat ./sbin/device/cpu_data.json | jq -r .cpu_model)
   cpu_flag=$(cat ./sbin/device/cpu_data.json | jq -r .cpu_flag)
   cpu_mhz=$(cat ./sbin/device/cpu_data.json | jq -r .cpu_mhz)
-  echo "---------------------------------Cpu Device Info---------------------------------"
-  echo -e "Model: $cpu_model (型号)\t MHz: $cpu_mhz (频率)"
-  echo -e "Flag: $cpu_flag (指令集)"
-  echo -e "\n"
+  echo "---------------------------------Cpu Device Info---------------------------------" | tee ./log/cpu_device.log
+  echo -e "Model: $cpu_model (型号)\t MHz: $cpu_mhz (频率)" | tee -a ./log/cpu_device.log
+  echo -e "Flag: $cpu_flag (指令集)" | tee -a ./log/cpu_device.log
+  echo -e "\n" | tee -a ./log/cpu_device.log
+
   rm -rf ./sbin/device/cpu_data.json
 }
 
@@ -19,18 +20,19 @@ function mem_device_info() {
   sh ./sbin/device/device_mem_base_info.sh $base_path
 
   mem_size=$(cat ./sbin/device/mem_data.json | jq -r .mem_size)
-  echo "---------------------------------Mem Device Info---------------------------------"
-  echo -e "Size: $mem_size (容量)"
-  echo -e "\n"
+  echo "---------------------------------Mem Device Info---------------------------------"| tee ./log/mem_device.log
+  echo -e "Size: $mem_size (容量)" | tee -a ./log/mem_device.log
+  echo -e "\n" | tee -a ./log/mem_device.log
+
   rm -rf ./sbin/device/mem_data.json
 }
 
 function disk_device_info() {
   # disk device info
-  echo "---------------------------------Disk Device Info---------------------------------"
-  echo "磁盘列表："
-  sh ./sbin/device/device_disk_base_info.sh $base_path
-  echo -e "\n"
+  echo "---------------------------------Disk Device Info---------------------------------" | tee ./log/disk_device.log
+  echo "磁盘列表：" | tee -a ./log/disk_device.log
+  sh ./sbin/device/device_disk_base_info.sh $base_path | tee -a ./log/disk_device.log
+  echo -e "\n" | tee -a ./log/disk_device.log
 }
 
 function network_device_info() {
@@ -38,9 +40,9 @@ function network_device_info() {
   sh ./sbin/device/device_network_base_info.sh $base_path
 
   network_device=$(cat ./sbin/device/network_data.json | jq -r .network_device)
-  echo "---------------------------------Network Device Info---------------------------------"
-  echo -e "Device: $network_device (型号)"
-  echo -e "\n"
+  echo "---------------------------------Network Device Info---------------------------------" | tee ./log/network_device.log
+  echo -e "Device: $network_device (型号)" | tee -a ./log/network_device.log
+  echo -e "\n" | tee -a ./log/network_device.log
   rm -rf ./sbin/device/network_data.json
 }
 
@@ -52,9 +54,9 @@ function system_info() {
   kenel=$(cat ./sbin/system/data.json | jq -r .kenel)
   arch=$(cat ./sbin/system/data.json | jq -r .arch)
   host=$(cat ./sbin/system/data.json | jq -r .host)
-  echo "---------------------------------System Base Info---------------------------------"
-  echo -e "System: $system (系统)\t Kenel: $kenel (内核版本)\t Arch: $arch (架构)\t Host: $host (主机名称)"
-  echo -e "\n"
+  echo "---------------------------------System Base Info---------------------------------" | tee ./log/system_base.log
+  echo -e "System: $system (系统)\t Kenel: $kenel (内核版本)\t Arch: $arch (架构)\t Host: $host (主机名称)" | tee -a ./log/system_base.log
+  echo -e "\n" | tee -a ./log/system_base.log
   rm -rf ./sbin/system/data.json
 }
 
@@ -70,6 +72,10 @@ function cpu_test() {
   echo -e "Threads totalTime: $cpu_threads_time (调度500个线程耗时)"
   echo -e "Mips: $cpu_mips (每秒多少百万条指令)"
   echo -e "\n"
+  if [ ! -f "./log/cpu_test.csv" ]; then
+    echo "计算10000以内最大素数耗时,调度500个线程耗时,每秒多少百万条指令">./log/cpu_test.csv
+  fi
+  echo "$cpu_prime_time,$cpu_threads_time,$cpu_mips">>./log/cpu_test.csv
   rm -rf ./sbin/cpu/data.json
 }
 
@@ -85,6 +91,10 @@ function mem_test() {
   echo -e "totalEvents: $mem_speed_totalevents (读/写8K大小内存块数)"
   echo -e "totalSpeed: $mem_speed_totalspeed (每秒读写速度)"
   echo -e "\n"
+  if [ ! -f "./log/mem_test.csv" ]; then
+    echo "读写2G的耗时,读/写8K大小内存块数,每秒读写速度">./log/mem_test.csv
+  fi
+  echo "$mem_speed_totaltime,$mem_speed_totalevents,$mem_speed_totalspeed">>./log/mem_test.csv
   rm -rf ./sbin/memory/data.json
 
 }
@@ -103,10 +113,14 @@ function disk_test() {
   disk_throughput_rand_write=$(cat ./sbin/disk/data.json | jq -r .disk_throughput_rand_write)
   echo "---------------------------------Disk Test Info---------------------------------"
   echo -e "disk_iops_4krandrw_read: $disk_iops_4krandrw_read (4k数据块随机读iops)\t disk_iops_4krandrw_write: $disk_iops_4krandrw_write (4k数据块随机写iops)"
-  echo -e "disk_4krandr_read_95clat: $disk_4krandr_read_95clat (4k数据块随机读95%延迟)\t disk_4krandr_write_95clat: $disk_4krandr_write_95clat (4k数据块随机写95%延迟)"
-  echo -e "disk_4krandr_read_maxlat: $disk_4krandr_read_maxlat (4k数据块随机读最大延迟)\t disk_4krandr_write_maxlat: $disk_4krandr_write_maxlat (4k数据块随机写最大延迟)"
+  echo -e "disk_4krandr_read_95clat: ${disk_4krandr_read_95clat}us (4k数据块随机读95%延迟)\t disk_4krandr_write_95clat: ${disk_4krandr_write_95clat}us (4k数据块随机写95%延迟)"
+  echo -e "disk_4krandr_read_maxlat: ${disk_4krandr_read_maxlat}us (4k数据块随机读最大延迟)\t disk_4krandr_write_maxlat: ${disk_4krandr_write_maxlat}us (4k数据块随机写最大延迟)"
   echo -e "disk_throughput_rand_read: $disk_throughput_rand_read (随机读吞吐量)\t disk_throughput_rand_write: $disk_throughput_rand_write (随机写吞吐量)"
   echo -e "\n"
+  if [ ! -f "./log/disk_test.csv" ]; then
+    echo "4k数据块随机读iops,4k数据块随机写iops,4k数据块随机读95%延迟,4k数据块随机写95%延迟,4k数据块随机读最大延迟,4k数据块随机写最大延迟,随机读吞吐量,随机写吞吐量">./log/disk_test.csv
+  fi
+  echo "$disk_iops_4krandrw_read,$disk_iops_4krandrw_write,${disk_4krandr_read_95clat}us,${disk_4krandr_write_95clat}us,${disk_4krandr_read_maxlat}us,${disk_4krandr_write_maxlat}us,$disk_throughput_rand_read,$disk_throughput_rand_write">>./log/disk_test.csv
   rm -rf ./sbin/disk/data.json
 }
 
@@ -125,6 +139,10 @@ function network_test() {
   echo -e "network_tcp_bitrate_sender: \t$network_tcp_bitrate_sender (TCP发送带宽)\t network_tcp_bitrate_receiver: \t$network_tcp_bitrate_receiver (TCP接收带宽)"
   echo -e "network_udp_bitrate: \t$network_udp_bitrate (UDP带宽)\t network_udp_jitter: \t$network_udp_jitter (UDP延迟)\t network_udp_lost: \t$network_udp_lost (UDP丢包率)"
   echo -e "\n"
+  if [ ! -f "./log/network_test.csv" ]; then
+    echo "TCP发送带宽,TCP接收带宽,UDP带宽,UDP延迟,UDP丢包率">./log/network_test.csv
+  fi
+  echo "$network_tcp_bitrate_sender,$network_tcp_bitrate_receiver,$network_udp_bitrate,$network_udp_jitter,$network_udp_lost">>./log/network_test.csv
   rm -rf ./sbin/network/data.json
 
 }

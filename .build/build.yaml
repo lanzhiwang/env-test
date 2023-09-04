@@ -2,15 +2,11 @@ apiVersion: builds.katanomi.dev/v1alpha1
 kind: Build
 spec:
   workspaces:
-    - description: >
-        This workspace is shared among all the pipeline tasks to read/write
-        common resources
+    - description: |
+        This workspace is shared among all the pipeline tasks to read/write common resources
       name: source
   tasks:
     - name: build-image-amd64
-      runAfter:
-        - unit-test
-        - code-scan
       timeout: 30m
       retries: 0
       taskRef:
@@ -23,16 +19,7 @@ spec:
         - name: container-images
           value:
             - build-harbor.alauda.cn/middleware/env-test
-        - name: dockerfile
-          value: ./build/docker/Dockerfile
-        - name: labels
-          value:
-            - branch=$(build.git.branch.name)
-            - commit=$(build.git.lastCommit.id)
     - name: build-image-arm64
-      runAfter:
-        - code-scan
-        - unit-test
       timeout: 30m
       retries: 0
       taskRef:
@@ -41,16 +28,11 @@ spec:
       workspaces:
         - name: source
           workspace: source
+      when: []
       params:
         - name: container-images
           value:
             - build-harbor.alauda.cn/middleware/env-test
-        - name: dockerfile
-          value: ./build/docker/Dockerfile
-        - name: labels
-          value:
-            - branch=$(build.git.branch.name)
-            - commit=$(build.git.lastCommit.id)
     - name: merge-image
       runAfter:
         - build-image-arm64
@@ -71,35 +53,95 @@ spec:
           value:
             - $(tasks.build-image-arm64.results.ociContainerImageBuild-url)
             - $(tasks.build-image-amd64.results.ociContainerImageBuild-url)
-    - name: scan-image
-      runAfter:
-        - merge-image
+    - name: build-statistics-image-amd64
       timeout: 30m
       retries: 0
       taskRef:
         kind: ClusterTask
-        name: trivy-image-scan
+        name: build-image-buildkit
       workspaces:
         - name: source
           workspace: source
       params:
-        - name: targets
+        - name: container-images
           value:
-            - $(tasks.merge-image.results.ociContainerImageBuild-url)
-        - name: quality-gate
-          value: "false"
-  git:
-    options:
-      depth: 1
-      timeout: 10m
+            - build-harbor.alauda.cn/middleware/env-test-statistics
+        - name: dockerfile
+          value: app/statistics/Dockerfile
+        - name: context
+          value: app/statistics
+    - name: build-statistics-image-arm64
+      timeout: 30m
       retries: 0
-      resources:
-        limits:
-          cpu: 200m
-          memory: 200Mi
-        requests:
-          cpu: 200m
-          memory: 200Mi
+      taskRef:
+        kind: ClusterTask
+        name: build-image-buildkit
+      workspaces:
+        - name: source
+          workspace: source
+      params:
+        - name: container-images
+          value:
+            - build-harbor.alauda.cn/middleware/env-test-statistics
+        - name: dockerfile
+          value: app/statistics/Dockerfile
+        - name: context
+          value: app/statistics
+    - name: merge-statistics-image
+      runAfter:
+        - build-statistics-image-arm64
+        - build-statistics-image-amd64
+      timeout: 30m
+      retries: 0
+      taskRef:
+        kind: ClusterTask
+        name: merge-image-buildkit
+      workspaces:
+        - name: source
+          workspace: source
+      params:
+        - name: container-images
+          value:
+            - build-harbor.alauda.cn/middleware/env-test-statistics:$(build.git.version.docker)
+        - name: source-image-digests
+          value:
+            - $(tasks.build-statistics-image-amd64.results.ociContainerImageBuild-url)
+            - $(tasks.build-statistics-image-arm64.results.ociContainerImageBuild-url)
+  finally:
+    - name: release-tag
+      when:
+        - input: $(build.git.versionPhase)
+          operator: in
+          values:
+            - custom
+            - ga
+        - input: $(tasks.status)
+          operator: in
+          values:
+            - Succeeded
+            - Completed
+      timeout: 30m
+      retries: 0
+      taskRef:
+        kind: ClusterTask
+        name: alauda-release-tag
+      workspaces:
+        - name: source
+          workspace: source
+      params:
+        - name: version
+          value: $(build.git.version.docker)
+        - name: container-image
+          value: build-harbor.alauda.cn/middleware/mysql-mgr-operator
+        - name: container-image-tag
+          value: $(build.git.version.docker)
+        - name: labels
+          value:
+            - branch=$(build.git.branch.name)
+            - commit=$(build.git.lastCommit.id)
+        - name: container-images
+          value:
+            - build-harbor.alauda.cn/middleware/mysql-mgr-operator:$(build.git.version.docker)
   runTemplate:
     spec:
       taskRunSpecs:
@@ -111,3 +153,113 @@ spec:
               - key: build-arm
                 operator: Exists
                 effect: NoSchedule
+          stepOverrides:
+            - name: prepare
+              resources:
+                requests:
+                  cpu: 166m
+                  memory: 341Mi
+                limits:
+                  cpu: 500m
+                  memory: 1024Mi
+            - name: build
+              resources:
+                requests:
+                  cpu: 166m
+                  memory: 341Mi
+                limits:
+                  cpu: 500m
+                  memory: 1024Mi
+            - name: push
+              resources:
+                requests:
+                  cpu: 168m
+                  memory: 342Mi
+                limits:
+                  cpu: 500m
+                  memory: 1024Mi
+        - pipelineTaskName: build-statistics-image-arm64
+          taskPodTemplate:
+            nodeSelector:
+              kubernetes.io/arch: arm64
+            Tolerations:
+              - key: build-arm
+                operator: Exists
+                effect: NoSchedule
+          stepOverrides:
+            - name: prepare
+              resources:
+                requests:
+                  cpu: 166m
+                  memory: 341Mi
+                limits:
+                  cpu: 500m
+                  memory: 1024Mi
+            - name: build
+              resources:
+                requests:
+                  cpu: 166m
+                  memory: 341Mi
+                limits:
+                  cpu: 500m
+                  memory: 1024Mi
+            - name: push
+              resources:
+                requests:
+                  cpu: 168m
+                  memory: 342Mi
+                limits:
+                  cpu: 500m
+                  memory: 1024Mi
+        - pipelineTaskName: build-image-amd64
+          stepOverrides:
+            - name: prepare
+              resources:
+                requests:
+                  cpu: 166m
+                  memory: 341Mi
+                limits:
+                  cpu: 500m
+                  memory: 1024Mi
+            - name: build
+              resources:
+                requests:
+                  cpu: 166m
+                  memory: 341Mi
+                limits:
+                  cpu: 500m
+                  memory: 1024Mi
+            - name: push
+              resources:
+                requests:
+                  cpu: 168m
+                  memory: 342Mi
+                limits:
+                  cpu: 500m
+                  memory: 1024Mi
+        - pipelineTaskName: build-statistics-image-amd64
+          stepOverrides:
+            - name: prepare
+              resources:
+                requests:
+                  cpu: 166m
+                  memory: 341Mi
+                limits:
+                  cpu: 500m
+                  memory: 1024Mi
+            - name: build
+              resources:
+                requests:
+                  cpu: 166m
+                  memory: 341Mi
+                limits:
+                  cpu: 500m
+                  memory: 1024Mi
+            - name: push
+              resources:
+                requests:
+                  cpu: 168m
+                  memory: 342Mi
+                limits:
+                  cpu: 500m
+                  memory: 1024Mi

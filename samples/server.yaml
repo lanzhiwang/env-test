@@ -1,0 +1,46 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: env-test-server
+  namespace: {namespace}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      service.cpaas.io/name: deployment-env-test
+  template:
+    metadata:
+      labels:
+        service.cpaas.io/name: deployment-env-test
+    spec:
+      containers:
+        - name: env-server
+          image: registry.alauda.cn:60080/middleware/env-test:1.0.0
+          command:
+            - /workspace/endpoint.sh
+          env:
+            - name: IPERF_SERVER_LISTEN_ADDR
+              value: 0.0.0.0
+            - name: RUN_MODE
+              value: server
+            - name: IPERF_SERVER_LISTEN_PORT
+              value: "3389"
+          ports:
+            - containerPort: 3389
+              protocol: TCP
+          resources:
+            requests:
+              cpu: "1"
+              memory: 100Mi
+            limits:
+              cpu: "1"
+              memory: 100Mi
+      restartPolicy: Always
+      nodeSelector:
+        kubernetes.io/hostname: {hostname}
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+  strategy:
+    type: Recreate
+  revisionHistoryLimit: 10
+  progressDeadlineSeconds: 600

@@ -1,0 +1,9 @@
+---------------------------------Disk Device Info---------------------------------
+磁盘列表：
+/0/100/5/0  vda     disk           Virtual I/O device
+/0/100/8/0  vdb     disk           Virtual I/O device
+/0/100/9/0  vdc     disk           Virtual I/O device
+/0/100/a/0  vdd     disk           Virtual I/O device
+/0/100/b/0  vde     disk           Virtual I/O device
+/0/100/c/0  vdf     disk           Virtual I/O device
+

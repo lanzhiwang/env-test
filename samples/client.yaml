@@ -1,0 +1,74 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: env-test-client
+  namespace: {namespace}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      service.cpaas.io/name: deployment-env-test
+  template:
+    metadata:
+      labels:
+        service.cpaas.io/name: deployment-env-test
+    spec:
+      containers:
+        - name: env-client
+          image: registry.alauda.cn:60080/middleware/env-test:1.0.0
+          command:
+            - ./endpoint.sh
+          env:
+            - name: SLEEP_TIME
+              value: "3600"
+            - name: RUN_MODE
+              value: normal
+            - name: IPERF3_SERVER_ADDR
+              value: {IPERF3_SERVER_ADDR}
+            - name: IPERF3_SERVER_PORT
+              value: "3389"
+          resources:
+            limits:
+              cpu: "1"
+              memory: 1Gi
+            requests:
+              cpu: "1"
+              memory: 3Gi
+          volumeMounts:
+            - name: data
+              mountPath: /workspace/sbin/disk/data
+            - name: log
+              mountPath: /workspace/log
+        - name: env-statistics
+          image: registry.alauda.cn:60080/middleware/env-test-statistics:1.0.0
+          command:
+            - ./entrypoint.sh
+          env:
+            - name: INTERVAL
+              value: "60"
+          resources:
+            limits:
+              cpu: 200m
+              memory: 100Mi
+            requests:
+              cpu: 500m
+              memory: 500Mi
+          volumeMounts:
+            - name: log
+              mountPath: /workspace/log
+      nodeSelector:
+        kubernetes.io/hostname: {hostname}
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: data
+        - name: log
+          persistentVolumeClaim:
+            claimName: log
+  strategy:
+    type: Recreate
+  revisionHistoryLimit: 10
+  progressDeadlineSeconds: 600
