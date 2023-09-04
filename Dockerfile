@@ -1,4 +1,4 @@
-FROM centos:centos7.9.2009 as builder
+FROM docker-mirrors.alauda.cn/library/centos:centos7.9.2009 as builder
 WORKDIR /src
 RUN yum install -y automake libtool wget which make git
 RUN wget https://github.com/akopytov/sysbench/archive/1.0.20.tar.gz -O sysbench-1.0.20.tar.gz \

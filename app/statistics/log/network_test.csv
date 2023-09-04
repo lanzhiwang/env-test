@@ -1,0 +1,21 @@
+TCP发送带宽,TCP接收带宽,UDP带宽,UDP延迟,UDP丢包率
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+5.80 Gbits/sec,5.80 Gbits/sec,236 Mbits/sec,0.022 ms,3902/219236 (1.8%)
+5.48 Gbits/sec,5.48 Gbits/sec,242 Mbits/sec,0.003 ms,4202/224689 (1.9%)
+5.29 Gbits/sec,5.29 Gbits/sec,236 Mbits/sec,0.030 ms,5170/218436 (2.4%)
+5.64 Gbits/sec,5.64 Gbits/sec,235 Mbits/sec,0.013 ms,8385/218341 (3.8%)
+5.61 Gbits/sec,5.61 Gbits/sec,243 Mbits/sec,0.008 ms,8077/225553 (3.6%)
+5.59 Gbits/sec,5.59 Gbits/sec,240 Mbits/sec,0.059 ms,10343/222134 (4.7%)
+5.63 Gbits/sec,5.63 Gbits/sec,240 Mbits/sec,0.005 ms,10194/222552 (4.6%)
+5.35 Gbits/sec,5.35 Gbits/sec,236 Mbits/sec,0.011 ms,13184/218564 (6%)
+5.91 Gbits/sec,5.91 Gbits/sec,249 Mbits/sec,0.002 ms,7646/230774 (3.3%)
+5.61 Gbits/sec,5.60 Gbits/sec,233 Mbits/sec,0.002 ms,2099/216798 (0.97%)
+5.15 Gbits/sec,5.15 Gbits/sec,227 Mbits/sec,0.002 ms,6564/210718 (3.1%)
+5.40 Gbits/sec,5.40 Gbits/sec,235 Mbits/sec,0.015 ms,7248/217759 (3.3%)
+5.81 Gbits/sec,5.81 Gbits/sec,243 Mbits/sec,0.005 ms,7875/225258 (3.5%)
+5.63 Gbits/sec,5.63 Gbits/sec,243 Mbits/sec,0.001 ms,9854/225050 (4.4%)
+5.57 Gbits/sec,5.57 Gbits/sec,244 Mbits/sec,0.012 ms,7624/226293 (3.4%)
