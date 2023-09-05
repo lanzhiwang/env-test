@@ -20,6 +20,7 @@ class EnvLogStatistic:
             "unit":"s",
         },
         "每秒读写速度":{
+            "std":lambda x:(str(int(x[:-len(" Gbits/sec")]) * 1024) + ' Mbits/sec' if x.endswith(' Gbits/sec') else x),
             "unit":" MiB/sec",
         },
         "4k数据块随机读95%延迟":{
@@ -35,9 +36,15 @@ class EnvLogStatistic:
             "unit": "us",
         },
         "TCP发送带宽":{
+            "std":lambda x:(str(float(x[:-len(" Mbits/sec")]) / 1024) + ' Gbits/sec' if x.endswith(' Mbits/sec') else x),
             "unit":" Gbits/sec",
         },
+        "TCP接收带宽": {
+            "std": lambda x: (str(float(x[:-len(" Mbits/sec")]) / 1024) + ' Gbits/sec' if x.endswith(' Mbits/sec') else x),
+            "unit": " Gbits/sec",
+        },
         "UDP带宽":{
+            "std":lambda x:(str(float(x[:-len(" Gbits/sec")]) * 1024) + ' Mbits/sec' if x.endswith(' Gbits/sec') else x),
             "unit":" Mbits/sec",
         },
         "UDP延迟":{
@@ -58,37 +65,44 @@ class EnvLogStatistic:
             self.calculate_info(calculate_item)
     def device_info(self,path:str):
         with open(path)as f:
-            print(f.read())
+            pprint(f.read())
 
     def calculate_info(self,calculate_item:dict):
-        print(f"########{calculate_item['title']}#########")
+        pprint(f"########{calculate_item['title']}#########")
         df=pd.read_csv(os.path.join(self.log_dir,calculate_item["file"]))
         df=df.dropna()
         for col in df.columns:
             if col in self.calculate_rules and df[col].dtype!="float64":
+                if "std" in self.calculate_rules[col]:
+                    df[col]=df[col].map(self.calculate_rules[col]["std"])
                 if "func" in self.calculate_rules[col]:
-                    df[col]=df[col].apply(self.calculate_rules[col]["func"])
+                    df[col]=df[col].map(self.calculate_rules[col]["func"])
                 if  "unit" in self.calculate_rules[col]:
-                    df[col]=df[col].apply(lambda x: float(x.split(self.unit(col))[0]))
-                    print(f"{col}:\t{round(df[col].mean(),2)}{self.unit(col)}")
+                    df[col]=df[col].map(lambda x: float(x.split(self.unit(col))[0]))
+                    pprint(f"{col}:\t{round(df[col].mean(),2)}{self.unit(col)}")
                 else:
-                    print(f"{col}:\t{round(df[col].mean(),2)}")
+                    pprint(f"{col}:\t{round(df[col].mean(),2)}")
             elif df[col].dtype=="float64":
-                print(f"{col}:\t{round(df[col].mean(),2)}")
+                pprint(f"{col}:\t{round(df[col].mean(),2)}")
             else:
-                print(f"{col}:\t{df[col].mode()[0]}")
-        print()
+                pprint(f"{col}:\t{df[col].mode()[0]}")
+        pprint()
 
     def unit(self,col:str):
         return self.calculate_rules[col]["unit"]
 
+def pprint(*args,**kwargs):
+    print(*args,**kwargs,flush=True)
 
 if __name__ == '__main__':
     interval = 60
     if os.getenv("INTERVAL") is not None:
         interval = int(os.getenv("INTERVAL"))
-    print(f"interval:{interval}")
+    pprint(f"interval:{interval}")
     s = EnvLogStatistic()
     while True:
         time.sleep(interval)
-        s()
+        try:
+            s()
+        except Exception as e:
+            pprint(e)
