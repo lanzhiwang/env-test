@@ -19,3 +19,4 @@ TCP发送带宽,TCP接收带宽,UDP带宽,UDP延迟,UDP丢包率
 5.81 Gbits/sec,5.81 Gbits/sec,243 Mbits/sec,0.005 ms,7875/225258 (3.5%)
 5.63 Gbits/sec,5.63 Gbits/sec,243 Mbits/sec,0.001 ms,9854/225050 (4.4%)
 5.57 Gbits/sec,5.57 Gbits/sec,244 Mbits/sec,0.012 ms,7624/226293 (3.4%)
+5057 Mbits/sec,5057 Mbits/sec,0.2 Gbits/sec,0.012 ms,7624/226293 (3.4%)
