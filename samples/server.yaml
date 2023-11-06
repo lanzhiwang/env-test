@@ -16,6 +16,7 @@ spec:
       containers:
         - name: env-server
           image: registry.alauda.cn:60080/middleware/env-test:1.0.0
+          imagePullPolicy: Always
           command:
             - /workspace/endpoint.sh
           env:
