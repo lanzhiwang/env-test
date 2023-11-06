@@ -13,11 +13,8 @@ class EnvLogStatistic:
         {"file": "network_test.csv","title":"网络性能测试"},
     ]
     calculate_rules={
-        "计算10000以内最大素数耗时":{
-            "unit":"s",
-        },
-        "调度500个线程耗时":{
-            "unit":"s",
+        "计算10000以内所有素数的速度":{
+            "unit":"events/s",
         },
         "每秒读写速度":{
             "std":lambda x:(str(int(x[:-len(" Gbits/sec")]) * 1024) + ' Mbits/sec' if x.endswith(' Gbits/sec') else x),

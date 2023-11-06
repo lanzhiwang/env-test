@@ -65,10 +65,10 @@ function disk_throughput_info() {
   sysbench fileio --threads=16 --file-total-size=$size --file-test-mode=rndrw run > ${1}/sbin/disk/disk_throughput_info.data
 
   disk_throughput_rand_read_value=$(cat ${1}/sbin/disk/disk_throughput_info.data | grep "read, MiB/s" | awk -F':' '{print $2}')
-  disk_throughput_rand_read_value=$(trim_space "$disk_throughput_rand_read_value")
+  disk_throughput_rand_read_value=$(trim_space "$disk_throughput_rand_read_value")"MiB/s"
 
   disk_throughput_rand_write_value=$(cat ${1}/sbin/disk/disk_throughput_info.data | grep "written, MiB/s" | awk -F':' '{print $2}')
-  disk_throughput_rand_write_value=$(trim_space "$disk_throughput_rand_write_value")
+  disk_throughput_rand_write_value=$(trim_space "$disk_throughput_rand_write_value")"MiB/s"
 
   # clean
   sysbench fileio --threads=16 --file-total-size=$size --file-test-mode=rndrw cleanup &>/dev/null

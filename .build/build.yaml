@@ -99,6 +99,7 @@ spec:
       workspaces:
         - name: source
           workspace: source
+      when: []
       params:
         - name: container-images
           value:

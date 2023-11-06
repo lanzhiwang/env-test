@@ -64,18 +64,20 @@ function cpu_test() {
   # cpu test
   sh ./sbin/cpu/cpu_test_info.sh $base_path $platform
 
-  cpu_prime_time=$(cat ./sbin/cpu/data.json | jq -r .cpu_prime_time)
-  cpu_threads_time=$(cat ./sbin/cpu/data.json | jq -r .cpu_threads_time)
+  cpu_prime_events_per_second=$(cat ./sbin/cpu/data.json | jq -r .cpu_prime_events_per_second)
+  cpu_threads_fairness_events=$(cat ./sbin/cpu/data.json | jq -r .cpu_threads_fairness_events_key)
+  cpu_threads_fairness_exec_time=$(cat ./sbin/cpu/data.json | jq -r .cpu_threads_fairness_exec_time_key)
   cpu_mips=$(cat ./sbin/cpu/data.json | jq -r .cpu_mips)
   echo "---------------------------------Cpu Test Info---------------------------------"
-  echo -e "Prime totalTime: $cpu_prime_time (计算10000以内最大素数耗时)"
-  echo -e "Threads totalTime: $cpu_threads_time (调度500个线程耗时)"
-  echo -e "Mips: $cpu_mips (每秒多少百万条指令)"
+  echo -e "Prime calc speed: $cpu_prime_events_per_second events/s (计算10000以内所有素数的速度)"
+  echo -e "Threads fairness events: $cpu_threads_fairness_events (500线程调度时events的分布)"
+  echo -e "Threads fairness execution time: $cpu_threads_fairness_exec_time (500线程调度时执行时间的分布)"
+  echo -e "Mips: $cpu_mips MIPS (每秒多少百万条指令)"
   echo -e "\n"
   if [ ! -f "./log/cpu_test.csv" ]; then
-    echo "计算10000以内最大素数耗时,调度500个线程耗时,每秒多少百万条指令">./log/cpu_test.csv
+    echo "计算10000以内所有素数的速度,500线程调度时events的分布,500线程调度时执行时间的分布,每秒多少百万条指令">./log/cpu_test.csv
   fi
-  echo "$cpu_prime_time,$cpu_threads_time,$cpu_mips">>./log/cpu_test.csv
+  echo "$cpu_prime_events_per_second,$cpu_threads_fairness_events,$cpu_threads_fairness_exec_time,$cpu_mips">>./log/cpu_test.csv
   rm -rf ./sbin/cpu/data.json
 }
 
@@ -84,17 +86,15 @@ function mem_test() {
   sh ./sbin/memory/memory_test_info.sh $base_path
 
   mem_speed_totaltime=$(cat ./sbin/memory/data.json | jq -r .mem_total_time)
-  mem_speed_totalevents=$(cat ./sbin/memory/data.json | jq -r .mem_total_events)
   mem_speed_totalspeed=$(cat ./sbin/memory/data.json | jq -r .mem_total_speed)
   echo "---------------------------------Memory Test Info---------------------------------"
   echo -e "totalTime: $mem_speed_totaltime (读写2G的耗时)"
-  echo -e "totalEvents: $mem_speed_totalevents (读/写8K大小内存块数)"
   echo -e "totalSpeed: $mem_speed_totalspeed (每秒读写速度)"
   echo -e "\n"
   if [ ! -f "./log/mem_test.csv" ]; then
-    echo "读写2G的耗时,读/写8K大小内存块数,每秒读写速度">./log/mem_test.csv
+    echo "写入2G数据耗时,写入吞吐量">./log/mem_test.csv
   fi
-  echo "$mem_speed_totaltime,$mem_speed_totalevents,$mem_speed_totalspeed">>./log/mem_test.csv
+  echo "$mem_speed_totaltime,$mem_speed_totalspeed">>./log/mem_test.csv
   rm -rf ./sbin/memory/data.json
 
 }
