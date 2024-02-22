@@ -59,4 +59,4 @@ RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-* \
     && yum install -y deltarpm fio lshw jq tree pciutils libtool vim telnet net-tools pkgconfig libaio-devel \
     && yum clean all
 
-ENTRYPOINT ["/workspace/endpoint.sh"]
+# ENTRYPOINT ["/workspace/endpoint.sh"]

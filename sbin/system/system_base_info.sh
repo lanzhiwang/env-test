@@ -2,6 +2,7 @@
 set -x
 
 source ${1}/sbin/common/common-base.sh
+# source /workspace/sbin/common/common-base.sh
 
 system_info='{}'
 
@@ -12,9 +13,16 @@ function system_base_info() {
 	system_host_key="host"
 
 	system_type_value=$(uname -a | awk '{print $1}')
+	# uname -a | awk '{print $1}'
+
 	kenel_version_value=$(uname -a | awk '{print $3}')
+	# uname -a | awk '{print $3}'
+
 	system_arch_value=$(uname -a | awk '{print $12}')
+	# uname -a | awk '{print $12}'
+
 	system_host_value=$(uname -a | awk '{print $2}')
+	# uname -a | awk '{print $2}'
 
 	system_type=$(create_json "$system_type_key" "$system_type_value")
 	kenel_version=$(create_json "$kenel_version_key" "$kenel_version_value")

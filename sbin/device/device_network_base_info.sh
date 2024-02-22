@@ -2,6 +2,7 @@
 set -x
 
 source ${1}/sbin/common/common-base.sh
+# source /workspace/sbin/common/common-base.sh
 
 network_info='{}'
 
@@ -9,6 +10,7 @@ function get_network_info() {
 	network_device_key="network_device"
 
 	network_device_value=$(lspci | grep "Host bridge" | awk -F':' '{print $3}' | sed 's/\[//' | sed 's/\]//' | sed 's/(//' | sed 's/)//')
+	# lspci | grep 'Host bridge' | awk -F: '{print $3}' | sed 's/\[//' | sed 's/\]//' | sed 's/(//' | sed 's/)//'
 
 	network_device=$(create_json "$network_device_key" "$network_device_value")
 

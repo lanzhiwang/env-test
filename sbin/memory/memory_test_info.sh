@@ -11,10 +11,18 @@ function mem_speed_test_info() {
 	mem_speed_totalspeed_key="mem_total_speed"
 
 	mem_speed_totaltime_value=$(sysbench memory --memory-block-size=8k --memory-total-size=2G run | grep "total time" | awk -F':' '{print $2}')
+	# sysbench memory --memory-block-size=8k --memory-total-size=2G run | grep 'total time' | awk -F: '{print $2}'
+
 	mem_speed_totaltime_value=$(trim_space "$mem_speed_totaltime_value")
+
 	mem_speed_totalevents_value=$(sysbench memory --memory-block-size=8k --memory-total-size=2G run | grep "total number of events" | awk -F':' '{print $2}')
+	# sysbench memory --memory-block-size=8k --memory-total-size=2G run | grep 'total number of events' | awk -F: '{print $2}'
+
 	mem_speed_totalevents_value=$(trim_space "$mem_speed_totalevents_value")
+
 	mem_speed_totalspeed_value=$(sysbench memory --memory-block-size=8k --memory-total-size=2G run | grep transferred | awk -F'(' '{print $2}' | sed 's/)//')
+	# sysbench memory --memory-block-size=8k --memory-total-size=2G run | grep transferred | awk '-F(' '{print $2}' | sed 's/)//'
+
 	mem_speed_totalspeed_value=$(trim_space "$mem_speed_totalspeed_value")
 
 	mem_speed_totaltime=$(create_json "$mem_speed_totaltime_key" "$mem_speed_totaltime_value")

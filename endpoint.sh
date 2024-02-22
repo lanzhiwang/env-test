@@ -4,13 +4,18 @@ set -x
 function cpu_device_info() {
 	# cpu device info
 	sh ./sbin/device/device_cpu_base_info.sh $base_path
+	# sh ./sbin/device/device_cpu_base_info.sh /workspace
 
 	cpu_model=$(cat ./sbin/device/cpu_data.json | jq -r .cpu_model)
 	cpu_flag=$(cat ./sbin/device/cpu_data.json | jq -r .cpu_flag)
 	cpu_mhz=$(cat ./sbin/device/cpu_data.json | jq -r .cpu_mhz)
+
 	echo "---------------------------------Cpu Device Info---------------------------------" | tee ./log/cpu_device.log
+
 	echo -e "Model: $cpu_model (型号)\t MHz: $cpu_mhz (频率)" | tee -a ./log/cpu_device.log
+
 	echo -e "Flag: $cpu_flag (指令集)" | tee -a ./log/cpu_device.log
+
 	echo -e "\n" | tee -a ./log/cpu_device.log
 
 	rm -rf ./sbin/device/cpu_data.json
@@ -19,10 +24,14 @@ function cpu_device_info() {
 function mem_device_info() {
 	# mem device info
 	sh ./sbin/device/device_mem_base_info.sh $base_path
+	# sh ./sbin/device/device_mem_base_info.sh /workspace
 
 	mem_size=$(cat ./sbin/device/mem_data.json | jq -r .mem_size)
+
 	echo "---------------------------------Mem Device Info---------------------------------" | tee ./log/mem_device.log
+
 	echo -e "Size: $mem_size (容量)" | tee -a ./log/mem_device.log
+
 	echo -e "\n" | tee -a ./log/mem_device.log
 
 	rm -rf ./sbin/device/mem_data.json
@@ -33,23 +42,31 @@ function disk_device_info() {
 	echo "---------------------------------Disk Device Info---------------------------------" | tee ./log/disk_device.log
 	echo "磁盘列表：" | tee -a ./log/disk_device.log
 	sh ./sbin/device/device_disk_base_info.sh $base_path | tee -a ./log/disk_device.log
+	# sh ./sbin/device/device_disk_base_info.sh /workspace
 	echo -e "\n" | tee -a ./log/disk_device.log
 }
 
 function network_device_info() {
 	# network device info
 	sh ./sbin/device/device_network_base_info.sh $base_path
+	# sh ./sbin/device/device_network_base_info.sh /workspace
 
 	network_device=$(cat ./sbin/device/network_data.json | jq -r .network_device)
+
 	echo "---------------------------------Network Device Info---------------------------------" | tee ./log/network_device.log
+
 	echo -e "Device: $network_device (型号)" | tee -a ./log/network_device.log
+
 	echo -e "\n" | tee -a ./log/network_device.log
+
 	rm -rf ./sbin/device/network_data.json
+
 }
 
 function system_info() {
 	# system info
 	sh ./sbin/system/system_base_info.sh $base_path
+	# sh ./sbin/system/system_base_info.sh /workspace
 
 	system=$(cat ./sbin/system/data.json | jq -r .system)
 	kenel=$(cat ./sbin/system/data.json | jq -r .kenel)
@@ -64,6 +81,7 @@ function system_info() {
 function cpu_test() {
 	# cpu test
 	sh ./sbin/cpu/cpu_test_info.sh $base_path $platform
+	# sh ./sbin/cpu/cpu_test_info.sh /workspace x86_64
 
 	cpu_prime_events_per_second=$(cat ./sbin/cpu/data.json | jq -r .cpu_prime_events_per_second)
 	cpu_threads_fairness_events=$(cat ./sbin/cpu/data.json | jq -r .cpu_threads_fairness_events_key)
@@ -85,6 +103,7 @@ function cpu_test() {
 function mem_test() {
 	# mem test
 	sh ./sbin/memory/memory_test_info.sh $base_path
+	# sh ./sbin/memory/memory_test_info.sh /workspace
 
 	mem_speed_totaltime=$(cat ./sbin/memory/data.json | jq -r .mem_total_time)
 	mem_speed_totalspeed=$(cat ./sbin/memory/data.json | jq -r .mem_total_speed)
@@ -103,6 +122,7 @@ function mem_test() {
 function disk_test() {
 	# disk test
 	sh ./sbin/disk/disk_test_info.sh $base_path
+	# sh ./sbin/disk/disk_test_info.sh /workspace
 
 	disk_iops_4krandrw_read=$(cat ./sbin/disk/data.json | jq -r .disk_iops_4krandrw_read)
 	disk_iops_4krandrw_write=$(cat ./sbin/disk/data.json | jq -r .disk_iops_4krandrw_write)
@@ -128,6 +148,7 @@ function disk_test() {
 function network_test() {
 	# network test
 	sh ./sbin/network/network_test_info.sh $base_path
+	# sh ./sbin/network/network_test_info.sh /workspace
 
 	#  echo "---- $network_test_info ----"
 	network_tcp_bitrate_sender=$(cat ./sbin/network/data.json | jq -r .network_bitrate_sender)
@@ -151,29 +172,50 @@ function network_test() {
 function network_server() {
 	echo "network_server start"
 	sh ./sbin/network/iperf_server.sh $base_path
+	# sh ./sbin/network/iperf_server.sh /workspace
 }
 
 base_path=$(pwd)
+# pwd
+# base_path=/workspace
+
 platform=$(arch)
+# arch
+# platform=x86_64
 
 function main() {
 	run_mode=${RUN_MODE}
+	# run_mode=server
+	# run_mode=normal
+
 	echo -e "********************\nRUN_MODE:${RUN_MODE}\n********************\n\n"
+	# ********************
+	# RUN_MODE:server
+	# ********************
+	# ********************
+	# RUN_MODE:normal
+	# ********************
 
 	if [ "${run_mode}"z = "server"z ]; then
+		# '[' serverz = serverz ']'
 		# server mode
 		if [[ "${IPERF_SERVER_LISTEN_PORT}"z = ""z || "${IPERF_SERVER_LISTEN_ADDR}"z = ""z ]]; then
+			# [[ 3389z = z ]] || [[ 0.0.0.0z = z ]]
 			echo "server mode must set IPERF_SERVER_LISTEN_ADDR and IPERF_SERVER_LISTEN_PORT env first!"
 			return 1
 		fi
 
 		network_server
+		# network_server
 	elif [ "${run_mode}"z = "normal"z ]; then
+		# '[' normalz = normalz ']'
 		# nomal mode
 		if [ "${IPERF3_SERVER_ADDR}"z = ""z ]; then
+			# '[' 10.4.2.3z = z ']'
 			echo "normal mode must set IPERF3_SERVER_ADDR and IPERF3_SERVER_PORT env first!"
 			return 1
 		fi
+
 		# device info
 		cpu_device_info
 		mem_device_info
@@ -182,8 +224,11 @@ function main() {
 
 		# system info
 		system_info
+
 		timer=${RUN_TIME:-600}
+		# timer=600
 		while [ $timer -gt 0 ]; do
+			# '[' 600 -gt 0 ']'
 			# device test
 			cpu_test
 			mem_test
@@ -206,3 +251,4 @@ function main() {
 }
 
 main "$@"
+# main

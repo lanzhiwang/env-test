@@ -8,7 +8,11 @@ runtime=30
 disk_info="{}"
 
 function disk_iops_info() {
+	# disk_iops_info /workspace
+
 	filename=${1}/sbin/disk/data/fiotest
+	# filename=/workspace/sbin/disk/data/fiotest
+
 	disk_iops_4krandrw_read_key="disk_iops_4krandrw_read"
 	disk_iops_4krandrw_write_key="disk_iops_4krandrw_write"
 	disk_4krandr_read_95clat_key="disk_4krandr_read_95clat"
@@ -17,6 +21,8 @@ function disk_iops_info() {
 	disk_4krandr_write_maxlat_key="disk_4krandr_write_maxlat"
 
 	ret=$(fio -filename=$filename -direct=1 -iodepth 1 -thread -rw=randrw -rwmixread=70 -ioengine=psync -bs=4k -size=$size -numjobs=1 -runtime=$runtime -name=4k_randrw --output-format=json)
+	# fio -filename=/workspace/sbin/disk/data/fiotest -direct=1 -iodepth 1 -thread -rw=randrw -rwmixread=70 -ioengine=psync -bs=4k -size=2G -numjobs=1 -runtime=30 -name=4k_randrw --output-format=json
+
 	disk_iops_4krandr_read_avg_value=$(echo $ret | jq .jobs[0].read.iops_mean)
 	disk_iops_4krandr_read_avg_value=$(trim_space "$disk_iops_4krandr_read_avg_value")
 
@@ -60,10 +66,16 @@ function disk_throughput_info() {
 
 	#prepare
 	mkdir -p ${1}/sbin/disk/data
+	# mkdir -p /workspace/sbin/disk/data
+
 	cd ${1}/sbin/disk/data
+	# cd /workspace/sbin/disk/data
+
 	sysbench fileio --threads=16 --file-total-size=$size --file-test-mode=rndrw prepare &>/dev/null
+	# sysbench fileio --threads=16 --file-total-size=2G --file-test-mode=rndrw prepare
 
 	sysbench fileio --threads=16 --file-total-size=$size --file-test-mode=rndrw run >${1}/sbin/disk/disk_throughput_info.data
+	# sysbench fileio --threads=16 --file-total-size=2G --file-test-mode=rndrw run
 
 	disk_throughput_rand_read_value=$(cat ${1}/sbin/disk/disk_throughput_info.data | grep "read, MiB/s" | awk -F':' '{print $2}')
 	disk_throughput_rand_read_value=$(trim_space "$disk_throughput_rand_read_value")"MiB/s"
@@ -73,7 +85,10 @@ function disk_throughput_info() {
 
 	# clean
 	sysbench fileio --threads=16 --file-total-size=$size --file-test-mode=rndrw cleanup &>/dev/null
+	# sysbench fileio --threads=16 --file-total-size=2G --file-test-mode=rndrw cleanup
+
 	rm ${1}/sbin/disk/disk_throughput_info.data
+	# rm /workspace/sbin/disk/disk_throughput_info.data
 
 	disk_throughput_read=$(create_json "$disk_throughput_rand_read_key" "$disk_throughput_rand_read_value")
 	disk_throughput_write=$(create_json "$disk_throughput_rand_write_key" "$disk_throughput_rand_write_value")
@@ -85,5 +100,9 @@ function disk_throughput_info() {
 }
 
 disk_iops_info ${1}
+# disk_iops_info /workspace
+
 disk_throughput_info ${1}
+# disk_throughput_info /workspace
+
 echo $disk_info >${1}/sbin/disk/data.json
