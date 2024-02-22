@@ -1,21 +1,38 @@
 FROM docker-mirrors.alauda.cn/library/centos:centos7.9.2009 as builder
+
 WORKDIR /src
+
 RUN yum install -y automake libtool wget which make git glibc-static
+
+#####################################################################################
+
 RUN wget https://github.com/akopytov/sysbench/archive/1.0.20.tar.gz -O sysbench-1.0.20.tar.gz \
-&& tar -xvf sysbench-1.0.20.tar.gz
+    && tar -xvf sysbench-1.0.20.tar.gz
+
 WORKDIR /src/sysbench-1.0.20
+
 RUN sh autogen.sh && ./configure --without-mysql && make -j8 && make install
 
-WORKDIR /src
-COPY pkg/dhrystone ./dhrystone
-WORKDIR /src/dhrystone
-RUN gcc -c dry.c -o dry.o && gcc -DPASS2  dry.c dry.o  -o dry
+#####################################################################################
 
 WORKDIR /src
+
+COPY pkg/dhrystone ./dhrystone
+
+WORKDIR /src/dhrystone
+
+RUN gcc -c dry.c -o dry.o && gcc -DPASS2  dry.c dry.o  -o dry
+
+#####################################################################################
+
+WORKDIR /src
+
 RUN wget https://github.com/esnet/iperf/releases/download/3.15/iperf-3.15.tar.gz -O iperf-3.15.tar.gz; \
     tar -zxvf iperf-3.15.tar.gz; \
     ls -l iperf-3.15; \
     cd iperf-3.15 && ./configure --enable-static-bin && make
+
+#####################################################################################
 
 # Build the manager binary
 FROM docker-mirrors.alauda.cn/library/centos:centos7.9.2009
@@ -33,6 +50,7 @@ WORKDIR /workspace
 
 # Copy source
 COPY endpoint.sh endpoint.sh
+
 COPY sbin ./sbin
 
 RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-* \
