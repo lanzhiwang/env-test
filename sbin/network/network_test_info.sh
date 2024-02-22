@@ -67,4 +67,6 @@ network_bitrate_test_info ${1}
 # network_bitrate_test_info /workspace
 
 network_udp_test_info ${1}
+# network_udp_test_info /workspace
+
 echo $network_info >${1}/sbin/network/data.json
