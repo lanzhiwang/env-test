@@ -1,4 +1,4 @@
 #!/bin/bash
-set -X
+set -x
 
 python statistics_env_logs.py

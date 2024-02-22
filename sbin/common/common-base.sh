@@ -1,5 +1,5 @@
 #!/bin/bash
-set -X
+set -x
 
 cd $1
 

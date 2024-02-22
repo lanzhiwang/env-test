@@ -1,5 +1,5 @@
 #!/bin/bash
-set -X
+set -x
 
 function cpu_device_info() {
 	# cpu device info

@@ -1,5 +1,5 @@
 #!/bin/bash
-set -X
+set -x
 
 source ${1}/sbin/common/common-base.sh
 
